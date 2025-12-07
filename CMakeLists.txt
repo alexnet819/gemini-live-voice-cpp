@@ -1,13 +1,19 @@
 cmake_minimum_required(VERSION 3.15)
 project(gemini-voice VERSION 1.0.0 LANGUAGES CXX)
 
+# Set CMake policies to suppress warnings
+cmake_policy(SET CMP0144 NEW)  # Use upper-case <PACKAGENAME>_ROOT variables
+cmake_policy(SET CMP0167 NEW)  # Use BoostConfig.cmake instead of FindBoost
+
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Find required packages
-find_package(Boost 1.70 REQUIRED COMPONENTS system)
+# Note: Modern Boost.Asio and Boost.Beast are header-only (since 1.69+)
+# so we don't need compiled components like 'system'
+find_package(Boost 1.70 REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(Threads REQUIRED)
 
@@ -48,7 +54,7 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 
 # Link libraries
 target_link_libraries(${PROJECT_NAME}
-    ${Boost_LIBRARIES}
+    Boost::headers
     OpenSSL::SSL
     OpenSSL::Crypto
     Threads::Threads
@@ -68,7 +74,7 @@ target_link_libraries(test_audio
 
 add_executable(test_websocket tests/test_websocket.cpp src/websocket_client.cpp src/message_handler.cpp)
 target_link_libraries(test_websocket
-    ${Boost_LIBRARIES}
+    Boost::headers
     OpenSSL::SSL
     OpenSSL::Crypto
     Threads::Threads
